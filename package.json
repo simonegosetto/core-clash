@@ -1,0 +1,29 @@
+{
+  "name": "rpg-hw-wars",
+  "version": "0.1.0",
+  "description": "",
+  "homepage": "https://github.com/simonegosetto/rpg-hw-wars#readme",
+  "bugs": {
+    "url": "https://github.com/simonegosetto/rpg-hw-wars/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simonegosetto/rpg-hw-wars.git"
+  },
+  "license": "ISC",
+  "author": "Simone Gosetto",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "crypto": "^1.0.1",
+    "dgram": "^1.0.1",
+    "os": "^0.1.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "systeminformation": "^5.27.10"
+  }
+}
