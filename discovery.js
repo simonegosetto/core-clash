@@ -1,20 +1,100 @@
 import dgram from "dgram";
 import os from "os";
+import fs from "fs";
+import path from "path";
+import readline from "readline";
 
 const DISC_PORT = 41234;
+const CONFIG_FILE = path.join(process.cwd(), "network-config.json");
 
-function getLocalIp() {
+// Funzione per ottenere tutte le interfacce di rete disponibili
+function getNetworkInterfaces() {
     const ifaces = os.networkInterfaces();
-    console.log(ifaces);
+    const interfaces = [];
+
     for (const name of Object.keys(ifaces)) {
-        for (const i of ifaces[name] || []) {
-            if (i.family === "IPv4" && !i.internal) return i.address;
+        for (const iface of ifaces[name] || []) {
+            if (iface.family === "IPv4" && !iface.internal) {
+                interfaces.push({
+                    name,
+                    address: iface.address,
+                    netmask: iface.netmask,
+                    cidr: iface.cidr
+                });
+            }
         }
     }
-    return "127.0.0.1";
+
+    return interfaces;
 }
 
-export function discoverHost(onHost, onTimeout) {
+// Funzione per permettere all'utente di scegliere l'interfaccia di rete
+async function chooseNetworkInterface() {
+    const interfaces = getNetworkInterfaces();
+
+    if (interfaces.length === 0) {
+        console.log("Nessuna interfaccia di rete disponibile. Utilizzo localhost.");
+        return "127.0.0.1";
+    }
+
+    // Controlla se esiste una configurazione salvata
+    try {
+        if (fs.existsSync(CONFIG_FILE)) {
+            const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+            const savedInterface = interfaces.find(iface => iface.address === config.selectedInterface);
+            if (savedInterface) {
+                console.log(`Utilizzo interfaccia salvata: ${savedInterface.name} (${savedInterface.address})`);
+                return savedInterface.address;
+            }
+        }
+    } catch (err) {
+        console.error("Errore nel leggere la configurazione salvata:", err.message);
+    }
+
+    // Mostra le interfacce disponibili
+    console.log("Interfacce di rete disponibili:");
+    interfaces.forEach((iface, index) => {
+        console.log(`${index + 1}. ${iface.name} - ${iface.address}`);
+    });
+
+    // Creazione dell'interfaccia di readline
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    // Richiesta all'utente
+    const answer = await new Promise(resolve => {
+        rl.question("Seleziona l'interfaccia di rete da utilizzare (numero) [1]: ", resolve);
+    });
+    rl.close();
+
+    // Gestione della risposta
+    let selectedIndex = parseInt(answer) - 1 || 0;
+    if (selectedIndex < 0 || selectedIndex >= interfaces.length) {
+        console.log("Selezione non valida, utilizzo la prima interfaccia.");
+        selectedIndex = 0;
+    }
+
+    const selectedInterface = interfaces[selectedIndex];
+    console.log(`Hai selezionato: ${selectedInterface.name} (${selectedInterface.address})`);
+
+    // Salva la configurazione
+    try {
+        fs.writeFileSync(CONFIG_FILE, JSON.stringify({ selectedInterface: selectedInterface.address }));
+        console.log("Configurazione salvata per usi futuri.");
+    } catch (err) {
+        console.error("Errore nel salvare la configurazione:", err.message);
+    }
+
+    return selectedInterface.address;
+}
+
+async function getLocalIp() {
+    return await chooseNetworkInterface();
+}
+
+export async function discoverHost(onHost, onTimeout) {
     const sock = dgram.createSocket({ type: "udp4", reuseAddr: true });
     let found = false; let closed = false; const timers = [];
 
@@ -44,8 +124,8 @@ export function discoverHost(onHost, onTimeout) {
     timers.push(to);
 }
 
-export function startHostResponder(hostPort) {
-    const hostIp = getLocalIp();
+export async function startHostResponder(hostPort) {
+    const hostIp = await getLocalIp();
     const sock = dgram.createSocket({ type: "udp4", reuseAddr: true });
     sock.on("message", (msg, rinfo) => {
         try {
