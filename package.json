@@ -1,0 +1,40 @@
+{
+  "name": "rpg-hw-wars",
+  "version": "0.1.0",
+  "description": "",
+  "homepage": "https://github.com/simonegosetto/rpg-hw-wars#readme",
+  "bugs": {
+    "url": "https://github.com/simonegosetto/rpg-hw-wars/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simonegosetto/rpg-hw-wars.git"
+  },
+  "license": "ISC",
+  "author": "Simone Gosetto",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "up:patch": "npm version patch",
+    "up:minor": "npm version minor",
+    "up:major": "npm version major",
+    "build:bundle": "ncc build index.js -o dist",
+    "build:sea": "node --experimental-sea-config sea-config.json",
+    "build:exe": "node -e \"require('fs').copyFileSync(process.execPath,'node-sea.exe')\" && npx postject node-sea.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE && node -e \"require('fs').renameSync('node-sea.exe','dist/core-clash.exe')\"",
+    "compile": "npm run build:bundle && npm run build:sea && npm run build:exe"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "crypto": "^1.0.1",
+    "dgram": "^1.0.1",
+    "os": "^0.1.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "systeminformation": "^5.27.10"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.4",
+    "postject": "^1.0.0-alpha.6"
+  }
+}
