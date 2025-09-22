@@ -24,7 +24,6 @@ function getNetworkInterfaces() {
             }
         }
     }
-
     return interfaces;
 }
 

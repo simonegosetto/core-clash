@@ -2,19 +2,15 @@ import { io } from "socket.io-client";
 import readline from "readline";
 import { renderPlayerCard, renderPlayersPanel } from "./ui.js";
 
-
 export function startClient(hostIp, port, character) {
     const socket = io(`http://${hostIp}:${port}`);
-
 
     let currentTurnId = null; let lastRenderedResultTurnId = null; let lastPlayers = [];
     const myId = character.id; let awaitingAction = false; let hostId = null; let inGame = false;
 
-
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout, historySize: 0, prompt: "" });
     const promptIdle = () => { rl.setPrompt("> "); rl.prompt(true); };
     const promptAction = () => { rl.setPrompt("Azione? [1=ATTACK ⚔️] [2=DEFEND 🛡️] [3=PASS ⏭️] > "); rl.prompt(true); };
-
 
     // stato aggiuntivo
     let mode = "idle"; // "idle" | "await_action" | "await_target"
@@ -90,12 +86,9 @@ export function startClient(hostIp, port, character) {
         rl.prompt(true);
     });
 
-
     rl.on("SIGINT", () => { try { rl.pause(); rl.close(); } catch {} console.log("[client] input chiuso."); });
 
-
     socket.on("connect", () => { socket.emit("lobby:join", { ...character, ready: true }); });
-
 
     socket.on("lobby:update", ({ players, hostId: hId, started }) => {
         hostId = hId; inGame = !!started; lastPlayers = players;
@@ -108,16 +101,13 @@ export function startClient(hostIp, port, character) {
         }
     });
 
-
     socket.on("lobby:waiting", ({ total, readyCount, minPlayers }) => { console.log(`In attesa: ready ${readyCount}/${total} (min ${minPlayers})`); });
     socket.on("lobby:error", ({ message }) => { console.log(`\n[ERROR] ${message}`); });
-
 
     socket.on("game:start", ({ players, hostId: hId }) => {
         hostId = hId; inGame = true; lastPlayers = players; currentTurnId = null; lastRenderedResultTurnId = null;
         console.clear(); console.log("=== GAME START ==="); players.forEach(p => console.log(renderPlayerCard(p))); promptIdle();
     });
-
 
     socket.on("turn:begin", ({ turnId, activePlayerId, activePlayerName, timeAllowed }) => {
         currentTurnId = turnId;
@@ -132,13 +122,11 @@ export function startClient(hostIp, port, character) {
         awaitingAction = (activePlayerId === myId); if (awaitingAction) promptAction(); else promptIdle();
     });*/
 
-
     socket.on("turn:result", ({ results, players, actorId }) => {
         if (currentTurnId && lastRenderedResultTurnId === currentTurnId) return; lastRenderedResultTurnId = currentTurnId;
         lastPlayers = players.map(p => ({ ...p, _acted: p.id === actorId }));
         results.forEach(r => console.log(r)); console.log(renderPlayersPanel(lastPlayers)); promptIdle();
     });
-
 
     socket.on("game:end", ({ winnerName }) => { console.log(`\n🏁 FINE PARTITA — Vince ${winnerName}`); try { rl.pause(); rl.close(); } catch {} });
     socket.on("disconnect", () => { console.log("[client] disconnesso."); try { rl.pause(); rl.close(); } catch {} });

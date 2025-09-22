@@ -39,7 +39,7 @@ Status: ${p.status ?? "-"}
 export function renderPlayersPanel(players) {
     const header = chalk.cyanBright(`>>> Players in match (${players.length}):`);
     const lines = players.map((p, idx) => {
-        const badge = p._acted ? chalk.whiteBright("★ ") : " ";
+        const badge = p._acted ? chalk.whiteBright("★ ") : "  ";
         const force = `⚔: ${p.force}`;
         const hpTxt = `${p.hp}/${p.maxHp}`;
         const hpStr = lpad(hpTxt, 7);

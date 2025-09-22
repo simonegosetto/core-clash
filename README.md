@@ -1,7 +1,10 @@
-# ⚔️ LAN Hardware Wars
+<img width="256" height="256" alt="core-clash" src="https://github.com/user-attachments/assets/23fe0861-ac7a-43a3-aa59-0b02d9bbd294" />
 
-**LAN Hardware Wars** is a turn-based RPG played entirely in the **console** and designed for **serverless LAN multiplayer**.  
-Each player becomes a character whose RPG stats are generated **directly from the hardware of their machine**.
+# ⚔️ Core CLASH
+
+**Core CLASH** is a turn-based RPG that runs entirely in the **console** and plays over LAN with no central server.
+Each PC becomes a character whose stats are generated from real hardware (CPU, RAM, GPU, Disk).
+Lobby and turns are managed serverlessly via UDP broadcast and socket.io.
 
 ---
 
