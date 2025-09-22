@@ -1,3 +1,5 @@
+<img width="1024" height="1024" alt="core-clash" src="https://github.com/user-attachments/assets/23fe0861-ac7a-43a3-aa59-0b02d9bbd294" />
+
 # ⚔️ Core CLASH
 
 **Core CLASH** is a turn-based RPG that runs entirely in the **console** and plays over LAN with no central server.
